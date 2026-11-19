@@ -50,6 +50,8 @@ def aftrekken(accumulator, waarde):
 
 def alu(operatie, a, b):
 
+    zero = 0
+
     if operatie == "ADD":
        resultaat, carry, overflow = optellen(a, b)
 
@@ -85,10 +87,19 @@ def alu(operatie, a, b):
         resultaat = (a >> 1) & 0xFF
         carry = a & 1
         overflow = 0
+    
+    if resultaat == 0:
+        zero = 1
+    else:
+        zero = 0
 
-    return resultaat, carry, overflow
+    negative = (resultaat >> 7) & 1
+
+    return resultaat, carry, overflow, zero, negative
   
-print(alu("SHR", 0b10010111, 0))
+print(alu("SUB", 25, 25))
+print(alu("ADD", 100, 50))
+print(alu("ADD", 28, 100))
 
 # 0 t/m 127 = positief of nul.
 # 128 t/m 255 = negatief.
