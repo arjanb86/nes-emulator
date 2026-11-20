@@ -23,7 +23,6 @@ def optellen(accumulator, waarde):
 
     return accumulator, carry, overflow
 
-
 def aftrekken(accumulator, waarde):
 
     carry = 0
@@ -45,8 +44,6 @@ def aftrekken(accumulator, waarde):
             overflow = 1
 
     return accumulator, carry, overflow
-
-
 
 def alu(operatie, a, b):
 
@@ -97,9 +94,37 @@ def alu(operatie, a, b):
 
     return resultaat, carry, overflow, zero, negative
   
-print(alu("SUB", 25, 25))
-print(alu("ADD", 100, 50))
-print(alu("ADD", 28, 100))
+def maak_status_register(carry, zero, interrupt_disable, decimal, overflow, negative):
+
+    carry_bit = carry << 0
+    zero_bit = zero << 1
+    interrupt_bit = interrupt_disable << 2
+    decimal_bit = decimal << 3
+    overflow_bit = overflow << 6
+    negative_bit = negative << 7
+
+    status = carry_bit | zero_bit | interrupt_bit | decimal_bit | overflow_bit | negative_bit
+
+    return status
+
+def lees_status_register(status):
+
+    carry = (status & 0b00000001)
+    zero = (status & 0b00000010) >> 1
+    interrupt_disable = (status & 0b00000100) >> 2
+    decimal = (status & 0b00001000) >> 3
+    overflow = (status & 0b01000000) >> 6
+    negative = (status & 0b10000000) >> 7
+
+    return carry, zero, interrupt_disable, decimal, overflow, negative
+
+status = maak_status_register(1, 0, 1, 0, 1, 1)
+
+flags = lees_status_register(status)
+
+print(f"{status:08b}")
+print(flags)
+
 
 # 0 t/m 127 = positief of nul.
 # 128 t/m 255 = negatief.
