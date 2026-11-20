@@ -66,15 +66,34 @@ class CPU:
 
         self.status = test_alu.maak_status_register(carry, zero, interrupt_disable, decimal, overflow, negative)
 
+    def voer_programma_uit(self, programma):
+
+        self.pc = 0
+
+        while self.pc < len(programma):
+
+            instructie, waarde = programma[self.pc]
+
+            if instructie == "LDA":
+                self.lda(waarde)
+
+            elif instructie == "LDX":
+                self.ldx(waarde)
+
+            elif instructie == "LDY":
+                self.ldy(waarde)
+
+            self.pc += 1
+            print(self.pc)
+
+
+programma = [
+    ("LDA", 10),
+    ("LDX", 20),
+    ("LDY", 30)
+]
 
 cpu = CPU()
-cpu.status = test_alu.maak_status_register(1, 0, 0, 0, 0, 0)
-
-print(test_alu.lees_status_register(cpu.status))
-cpu.ldy(150)
-
-print(cpu.y)
-print(test_alu.lees_status_register(cpu.status))
-
-
+cpu.voer_programma_uit(programma)
+print(cpu.a, cpu.x, cpu.y)
 
