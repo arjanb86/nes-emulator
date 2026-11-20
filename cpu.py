@@ -24,12 +24,57 @@ class CPU:
 
         self.status = test_alu.maak_status_register(carry, zero, interrupt_disable, decimal, overflow, negative)
 
+    def lda(self, waarde):
+        self.a = waarde
+
+        carry, zero, interrupt_disable, decimal, overflow, negative = test_alu.lees_status_register(self.status)
+
+        if waarde == 0:
+            zero = 1
+        else:
+            zero = 0
+
+        negative = (waarde >> 7) & 1
+
+        self.status = test_alu.maak_status_register(carry, zero, interrupt_disable, decimal, overflow, negative)
+
+    def ldx(self, waarde):
+        self.x = waarde
+
+        carry, zero, interrupt_disable, decimal, overflow, negative = test_alu.lees_status_register(self.status)
+
+        if waarde == 0:
+            zero = 1
+        else:
+            zero = 0
+
+        negative = (waarde >> 7) & 1
+
+        self.status = test_alu.maak_status_register(carry, zero, interrupt_disable, decimal, overflow, negative)
+
+    def ldy(self, waarde):
+        self.y = waarde
+
+        carry, zero, interrupt_disable, decimal, overflow, negative = test_alu.lees_status_register(self.status)
+
+        if waarde == 0:
+            zero = 1
+        else:
+            zero = 0
+
+        negative = (waarde >> 7) & 1
+
+        self.status = test_alu.maak_status_register(carry, zero, interrupt_disable, decimal, overflow, negative)
+
 
 cpu = CPU()
-cpu.a = 25
-cpu.execute_alu("SUB", cpu.a, 25, "a")
+cpu.status = test_alu.maak_status_register(1, 0, 0, 0, 0, 0)
 
-flags = test_alu.lees_status_register(cpu.status)
+print(test_alu.lees_status_register(cpu.status))
+cpu.ldy(150)
 
-print("Accumulator:", cpu.a)
-print("Zero:", flags)
+print(cpu.y)
+print(test_alu.lees_status_register(cpu.status))
+
+
+

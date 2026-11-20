@@ -118,9 +118,6 @@ def lees_status_register(status):
 
     return carry, zero, interrupt_disable, decimal, overflow, negative
 
-status = maak_status_register(1, 0, 1, 0, 1, 1)
-
-flags = lees_status_register(status)
 
 
 
