@@ -122,8 +122,7 @@ status = maak_status_register(1, 0, 1, 0, 1, 1)
 
 flags = lees_status_register(status)
 
-print(f"{status:08b}")
-print(flags)
+
 
 
 # 0 t/m 127 = positief of nul.
