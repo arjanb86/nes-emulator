@@ -83,17 +83,32 @@ class CPU:
             elif instructie == "LDY":
                 self.ldy(waarde)
 
-            self.pc += 1
-            print(self.pc)
+            elif instructie == "JMP":
+                self.pc = waarde
+
+            elif instructie == "BEQ":
+                carry, zero, interrupt_disable, decimal, overflow, negative = test_alu.lees_status_register(self.status)
+                if zero == 1:
+                    self.pc = waarde
+                else:
+                    self.pc += 1
+
+            if instructie not in ("JMP", "BEQ"):
+                self.pc += 1
 
 
 programma = [
-    ("LDA", 10),
+    ("LDA", 1),
+    ("BEQ", 3),
     ("LDX", 20),
-    ("LDY", 30)
+    ("LDY", 30),
+    ("LDX", 60)
+
 ]
 
 cpu = CPU()
 cpu.voer_programma_uit(programma)
 print(cpu.a, cpu.x, cpu.y)
+test = test_alu.alu("ADD", cpu.a, 10)
+print(test)
 
