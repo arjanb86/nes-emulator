@@ -8,6 +8,7 @@ class CPU:
         self.pc = 0
         self.sp = 0xFD
         self.status = 0
+        self.memory = [0] * 6553
 
     def execute_alu(self, operatie, register, waarde, bestemming):
 
@@ -37,6 +38,22 @@ class CPU:
         negative = (waarde >> 7) & 1
 
         self.status = test_alu.maak_status_register(carry, zero, interrupt_disable, decimal, overflow, negative)
+
+    def lda_absolute(self, adres):
+
+        waarde = self.memory[adres]
+        self.lda(waarde)
+
+    def lda_zero_page(self, adres):
+                
+        waarde = self.memory[adres]
+        self.lda(waarde)
+
+    def lda_absolute_x(self, adres):
+
+        effectief_adres = self.memory[adres + self.x]
+        waarde = effectief_adres
+        self.lda(waarde)
 
     def ldx(self, waarde):
         self.x = waarde
@@ -122,6 +139,34 @@ class CPU:
 
         self.status = test_alu.maak_status_register(carry, zero, interrupt_disable, decimal, overflow, negative)
 
+    def txa(self):
+        self.a = self.x
+
+        carry, zero, interrupt_disable, decimal, overflow, negative = test_alu.lees_status_register(self.status)
+
+        if self.a == 0:
+            zero = 1
+        else:
+            zero = 0
+
+        negative = (self.a >> 7) & 1
+
+        self.status = test_alu.maak_status_register(carry, zero, interrupt_disable, decimal, overflow, negative)
+
+    def tya(self):
+        self.a = self.y
+
+        carry, zero, interrupt_disable, decimal, overflow, negative = test_alu.lees_status_register(self.status)
+
+        if self.a == 0:
+            zero = 1
+        else:
+            zero = 0
+
+        negative = (self.a >> 7) & 1
+
+        self.status = test_alu.maak_status_register(carry, zero, interrupt_disable, decimal, overflow, negative)
+
 
 
     def voer_programma_uit(self, programma):
@@ -134,6 +179,15 @@ class CPU:
 
             if instructie == "LDA":
                 self.lda(waarde)
+
+            elif instructie == "LDA_ABSOLUTE":
+                self.lda_absolute(waarde)
+
+            elif instructie == "LDA_ABSOLUTE_X":
+                self.lda_absolute_x(waarde)
+
+            elif instructie == "LDA_ZERO_PAGE":
+                self.lda_zero_page(waarde)
 
             elif instructie == "LDX":
                 self.ldx(waarde)
@@ -170,23 +224,33 @@ class CPU:
             elif instructie == "TAY":
                 self.tay()
 
+            elif instructie == "TXA":
+                self.txa()
+
+            elif instructie == "TYA":
+                self.tya()
+
             if instructie not in ("JMP", "BEQ", "BNE"):
                 self.pc += 1
             print(self.pc)
 
 
 programma = [
-    ("LDA", 10),
-    ("LDX", 127),
+    ("LDA_ABSOLUTE", 100),
+    ("TAX", 0),
     ("INX", 0),
+    ("TXA", 0),
+    ("TAY", 0),
     ("INY", 0),
-    ("BNE", 5),
-    ("LDY", 50)
+    ("TYA", 0),
+    ("BNE", 9),
+    ("LDA", 0),
+    ("LDX", 50)
 ]
 
 cpu = CPU()
-cpu.a = 0
-cpu.tay()
+cpu.memory[100] = 42
+cpu.voer_programma_uit(programma)
 
 print(cpu.a, cpu.x, cpu.y)
 print(test_alu.lees_status_register(cpu.status))
