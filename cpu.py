@@ -278,6 +278,53 @@ class CPU:
 
         self.status = test_alu.maak_status_register(carry, zero, interrupt_disable, decimal, overflow, negative)
 
+    def and_(self, waarde):
+        resultaat = test_alu.alu("AND", self.a, waarde)[0]
+
+        carry, zero, interrupt_disable, decimal, overflow, negative = test_alu.lees_status_register(self.status)
+
+        self.a = resultaat
+
+        if resultaat == 0:
+            zero = 1
+        else:
+            zero = 0
+
+        negative = (resultaat >> 7) & 1
+
+        self.status = test_alu.maak_status_register(carry, zero, interrupt_disable, decimal, overflow, negative)
+
+    def ora(self, waarde):
+        resultaat = test_alu.alu("OR", self.a, waarde)[0]
+
+        carry, zero, interrupt_disable, decimal, overflow, negative = test_alu.lees_status_register(self.status)
+
+        self.a = resultaat
+
+        if resultaat == 0:
+            zero = 1
+        else:
+            zero = 0
+
+        negative = (resultaat >> 7) & 1
+
+        self.status = test_alu.maak_status_register(carry, zero, interrupt_disable, decimal, overflow, negative)
+
+    def eor(self, waarde):
+        resultaat = test_alu.alu("XOR", self.a, waarde)[0]
+
+        carry, zero, interrupt_disable, decimal, overflow, negative = test_alu.lees_status_register(self.status)
+
+        self.a = resultaat
+
+        if resultaat == 0:
+            zero = 1
+        else:
+            zero = 0
+
+        negative = (resultaat >> 7) & 1
+
+        self.status = test_alu.maak_status_register(carry, zero, interrupt_disable, decimal, overflow, negative)
 
     def voer_programma_uit(self, programma):
         self.pc = 0
@@ -349,6 +396,15 @@ class CPU:
             elif instructie == "CPY":
                 self.cpy(waarde)
 
+            elif instructie == "AND_":
+                self.and_(waarde)
+
+            elif instructie == "ORA":
+                self.ora(waarde)
+
+            elif instructie == "EOR":
+                self.eor(waarde)
+
             elif instructie == "LDX":
                 self.ldx(waarde)
 
@@ -410,9 +466,9 @@ programma = [
 
 cpu = CPU()
 
-cpu.x = 15
-
-cpu.cpx(15)
+cpu.a = 0b10101010
+cpu.and_(0b01010101)
 
 carry, zero, interrupt_disable, decimal, overflow, negative = test_alu.lees_status_register(cpu.status)
 print(carry, zero, interrupt_disable, decimal, overflow, negative)
+print(cpu.a)
