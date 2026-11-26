@@ -326,6 +326,79 @@ class CPU:
 
         self.status = test_alu.maak_status_register(carry, zero, interrupt_disable, decimal, overflow, negative)
 
+    def asl(self):
+        carry, zero, interrupt_disable, decimal, overflow, negative = test_alu.lees_status_register(self.status)
+        
+        resultaat, carry, _, _, _ = test_alu.alu("SHL", self.a, 0)
+
+        self.a = resultaat
+
+        if resultaat == 0:
+            zero = 1
+        else:
+            zero = 0
+
+        negative = (resultaat >> 7) & 1
+
+        self.status = test_alu.maak_status_register(carry, zero, interrupt_disable, decimal, overflow, negative)
+
+    def lsr(self):
+        carry, zero, interrupt_disable, decimal, overflow, negative = test_alu.lees_status_register(self.status)
+        
+        resultaat, carry, _, _, _ = test_alu.alu("SHR", self.a, 0)
+
+        self.a = resultaat
+
+        if resultaat == 0:
+            zero = 1
+        else:
+            zero = 0
+
+        negative = (resultaat >> 7) & 1
+
+        self.status = test_alu.maak_status_register(carry, zero, interrupt_disable, decimal, overflow, negative)
+
+    def rol(self):
+        carry, zero, interrupt_disable, decimal, overflow, negative = test_alu.lees_status_register(self.status)
+
+        oude_carry = carry
+        resultaat = ((self.a << 1) | oude_carry) & 0xFF
+
+        nieuwe_carry = (self.a >> 7) & 1
+        carry = nieuwe_carry
+
+        self.a = resultaat
+
+        if resultaat == 0:
+            zero = 1
+        else:
+            zero = 0
+
+        negative = (resultaat >> 7) & 1
+
+        self.status = test_alu.maak_status_register(carry, zero, interrupt_disable, decimal, overflow, negative)
+
+    def ror(self):
+        carry, zero, interrupt_disable, decimal, overflow, negative = test_alu.lees_status_register(self.status)
+
+        oude_carry = carry
+        resultaat = (oude_carry << 7 | (self.a >> 1)) & 0xFF
+
+        nieuwe_carry = self.a & 1
+        carry = nieuwe_carry
+
+        self.a = resultaat
+
+        if resultaat == 0:
+            zero = 1
+        else:
+            zero = 0
+
+        negative = (resultaat >> 7) & 1
+
+        self.status = test_alu.maak_status_register(carry, zero, interrupt_disable, decimal, overflow, negative)
+
+
     def voer_programma_uit(self, programma):
         self.pc = 0
 
@@ -386,6 +459,18 @@ class CPU:
 
             elif instructie == "STY_ZERO_PAGE_X":
                 self.sty_zero_page_x(waarde)
+
+            elif instructie == "ASL":
+                self.asl()
+
+            elif instructie == "LSR":
+                self.lsr()
+
+            elif instructie == "ROL":
+                self.rol()
+
+            elif instructie == "ROR":
+                self.ror()
 
             elif instructie == "CMP":
                 self.cmp(waarde)
@@ -466,8 +551,11 @@ programma = [
 
 cpu = CPU()
 
-cpu.a = 0b10101010
-cpu.and_(0b01010101)
+carry, zero, interrupt_disable, decimal, overflow, negative = test_alu.lees_status_register(cpu.status)
+
+cpu.a = 0b10110100
+cpu.status = test_alu.maak_status_register(1, zero, interrupt_disable, decimal, overflow, negative)
+cpu.ror()
 
 carry, zero, interrupt_disable, decimal, overflow, negative = test_alu.lees_status_register(cpu.status)
 print(carry, zero, interrupt_disable, decimal, overflow, negative)
