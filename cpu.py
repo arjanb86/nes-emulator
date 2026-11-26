@@ -11,7 +11,6 @@ class CPU:
         self.memory = [0] * 65536
 
     def execute_alu(self, operatie, register, waarde, bestemming):
-
         carry, zero, interrupt_disable, decimal, overflow, negative = test_alu.lees_status_register(self.status)
 
         resultaat, carry, overflow, zero, negative = test_alu.alu(operatie, register, waarde)
@@ -26,7 +25,6 @@ class CPU:
         self.status = test_alu.maak_status_register(carry, zero, interrupt_disable, decimal, overflow, negative)
 
     def lees_adres(self, adres):
-
         lage_byte = self.memory[adres]
         hoge_adres = (adres + 1) & 0xFF
         hoge_byte = self.memory[hoge_adres]
@@ -49,47 +47,70 @@ class CPU:
         self.status = test_alu.maak_status_register(carry, zero, interrupt_disable, decimal, overflow, negative)
 
     def lda_absolute(self, adres):
-
         waarde = self.memory[adres]
         self.lda(waarde)
 
-    def lda_zero_page(self, adres):
-                
+    def lda_zero_page(self, adres):   
         waarde = self.memory[adres]
         self.lda(waarde)
 
     def lda_absolute_x(self, adres):
-
         effectief_adres = self.memory[adres + self.x]
         waarde = effectief_adres
         self.lda(waarde)
 
     def lda_absolute_y(self, adres):
-
         effectief_adres = self.memory[adres + self.y]
         waarde = effectief_adres
         self.lda(waarde)
 
     def lda_zero_page_x(self, adres):
-
         effectief_adres = (adres + self.x) & 0xFF
         waarde = self.memory[effectief_adres]
         self.lda(waarde)
 
     def lda_indirect_y(self, adres):
-
         effectief_adres = self.lees_adres(adres) + self.y
         waarde = self.memory[effectief_adres]
         self.lda(waarde)
 
-    def sta_absolute(self, adres):
+    def sta_indirect_y(self, adres):
+        effectief_adres = (self.lees_adres(adres) + self.y) & 0xFFFF
+        self.memory[effectief_adres] = self.a
 
+    def sta_absolute(self, adres):
         self.memory[adres] = self.a
 
     def sta_absolute_x(self, adres):
-
         effectief_adres = adres + self.x
         self.memory[effectief_adres] = self.a
+
+    def sta_zero_page(self, adres):
+        self.memory[adres] = self.a
+
+    def sta_zero_page_x(self, adres):
+        effectief_adres = (adres + self.x) & 0xFF
+        self.memory[effectief_adres] = self.a
+
+    def stx_absolute(self, adres):
+        self.memory[adres] = self.x
+
+    def sty_absolute(self, adres):
+        self.memory[adres] = self.y
+
+    def stx_zero_page(self, adres):
+        self.memory[adres] = self.x
+
+    def sty_zero_page(self, adres):
+        self.memory[adres] = self.y
+
+    def stx_zero_page_y(self, adres):
+        effectieve_adres = (adres + self.y) & 0xFF
+        self.memory[effectieve_adres] = self.x
+
+    def sty_zero_page_x(self, adres):
+        effectieve_adres = (adres + self.x) & 0xFF
+        self.memory[effectieve_adres] = self.y
 
     def ldx(self, waarde):
         self.x = waarde
@@ -205,7 +226,6 @@ class CPU:
 
 
     def voer_programma_uit(self, programma):
-
         self.pc = 0
 
         while self.pc < len(programma):
@@ -235,6 +255,36 @@ class CPU:
 
             elif instructie == "STA_ABSOLUTE":
                 self.sta_absolute(waarde)
+
+            elif instructie == "STA_ABSOLUTE_X":
+                self.sta_absolute_x(waarde)
+
+            elif instructie == "STA_INDIRECT_Y":
+                self.sta_indirect_y(waarde)
+
+            elif instructie == "STA_ZERO_PAGE_X":
+                self.sta_zero_page_x(waarde)
+
+            elif instructie == "STA_ZERO_PAGE":
+                self.sta_zero_page(waarde)
+
+            elif instructie == "STX_ABSOLUTE":
+                self.stx_absolute(waarde)
+
+            elif instructie == "STY_ABSOLUTE":
+                self.sty_absolute(waarde)
+
+            elif instructie == "STX_ZERO_PAGE":
+                self.stx_zero_page(waarde)
+
+            elif instructie == "STY_ZERO_PAGE":
+                self.sty_zero_page(waarde)
+
+            elif instructie == "STX_ZERO_PAGE_Y":
+                self.stx_zero_page_y(waarde)
+
+            elif instructie == "STY_ZERO_PAGE_X":
+                self.sty_zero_page_x(waarde)
 
             elif instructie == "LDX":
                 self.ldx(waarde)
@@ -297,10 +347,13 @@ programma = [
 
 cpu = CPU()
 
-cpu.a = 123
-cpu.x = 5
+cpu.x = 10
+cpu.y = 200
 
-cpu.sta_absolute_x(0x0300)
+cpu.status = 0b11000011
+cpu.sty_zero_page_x(0xFA)
 
-print(cpu.memory[0x0305])
-print(cpu.a)
+print(cpu.memory[0x04])
+print(cpu.x)
+print(cpu.y)
+print(bin(cpu.status))
