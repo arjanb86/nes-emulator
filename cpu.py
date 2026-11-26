@@ -112,6 +112,60 @@ class CPU:
         effectieve_adres = (adres + self.x) & 0xFF
         self.memory[effectieve_adres] = self.y
 
+    def cmp(self, waarde):
+        carry, zero, interrupt_disable, decimal, overflow, negative = test_alu.lees_status_register(self.status)
+
+        if self.a - waarde == 0:
+            zero = 1
+        else:
+            zero = 0
+
+        if self.a >= waarde:
+            carry = 1
+        else:
+            carry = 0
+
+        resultaat = (self.a - waarde) & 0xFF
+        negative = (resultaat >> 7) & 1
+
+        self.status = test_alu.maak_status_register(carry, zero, interrupt_disable, decimal, overflow, negative)
+
+    def cpx(self, waarde):
+        carry, zero, interrupt_disable, decimal, overflow, negative = test_alu.lees_status_register(self.status)
+
+        if self.x - waarde == 0:
+            zero = 1
+        else:
+            zero = 0
+
+        if self.x >= waarde:
+            carry = 1
+        else:
+            carry = 0
+
+        resultaat = (self.x - waarde) & 0xFF
+        negative = (resultaat >> 7) & 1
+
+        self.status = test_alu.maak_status_register(carry, zero, interrupt_disable, decimal, overflow, negative)
+
+    def cpy(self, waarde):
+        carry, zero, interrupt_disable, decimal, overflow, negative = test_alu.lees_status_register(self.status)
+
+        if self.y - waarde == 0:
+            zero = 1
+        else:
+            zero = 0
+
+        if self.y >= waarde:
+            carry = 1
+        else:
+            carry = 0
+
+        resultaat = (self.y - waarde) & 0xFF
+        negative = (resultaat >> 7) & 1
+
+        self.status = test_alu.maak_status_register(carry, zero, interrupt_disable, decimal, overflow, negative)
+
     def ldx(self, waarde):
         self.x = waarde
 
@@ -286,6 +340,15 @@ class CPU:
             elif instructie == "STY_ZERO_PAGE_X":
                 self.sty_zero_page_x(waarde)
 
+            elif instructie == "CMP":
+                self.cmp(waarde)
+
+            elif instructie == "CPX":
+                self.cpx(waarde)
+
+            elif instructie == "CPY":
+                self.cpy(waarde)
+
             elif instructie == "LDX":
                 self.ldx(waarde)
 
@@ -347,13 +410,9 @@ programma = [
 
 cpu = CPU()
 
-cpu.x = 10
-cpu.y = 200
+cpu.x = 15
 
-cpu.status = 0b11000011
-cpu.sty_zero_page_x(0xFA)
+cpu.cpx(15)
 
-print(cpu.memory[0x04])
-print(cpu.x)
-print(cpu.y)
-print(bin(cpu.status))
+carry, zero, interrupt_disable, decimal, overflow, negative = test_alu.lees_status_register(cpu.status)
+print(carry, zero, interrupt_disable, decimal, overflow, negative)
