@@ -451,7 +451,73 @@ class CPU:
             overflow = 0
 
         self.status = test_alu.maak_status_register(carry, zero, interrupt_disable, decimal, overflow, negative)
-    
+
+    def dex(self):
+        self.x = (self.x - 1) & 0xFF
+
+        carry, zero, interrupt_disable, decimal, overflow, negative = test_alu.lees_status_register(self.status)
+
+        if self.x == 0:
+            zero = 1
+        else:
+            zero = 0
+
+        negative = (self.x >> 7) & 1
+
+        self.status = test_alu.maak_status_register(carry, zero, interrupt_disable, decimal, overflow, negative)
+
+    def dey(self):
+        self.y = (self.y - 1) & 0xFF
+
+        carry, zero, interrupt_disable, decimal, overflow, negative = test_alu.lees_status_register(self.status)
+
+        if self.y == 0:
+            zero = 1
+        else:
+            zero = 0
+
+        negative = (self.y >> 7) & 1
+
+        self.status = test_alu.maak_status_register(carry, zero, interrupt_disable, decimal, overflow, negative)
+
+    def dec(self, adres):
+        carry, zero, interrupt_disable, decimal, overflow, negative = test_alu.lees_status_register(self.status)
+
+        waarde = self.memory[adres]
+        waarde = (waarde -1) & 0xFF
+        self.memory[adres] = waarde
+
+        if waarde == 0:
+            zero = 1
+        else:
+            zero = 0
+
+        negative = (waarde >> 7) & 1
+
+        self.status = test_alu.maak_status_register(carry, zero, interrupt_disable, decimal, overflow, negative)
+
+    def pha(self):
+        adres = 0x0100 + self.sp
+        self.memory[adres] = self.a
+        self.sp = (self.sp - 1) & 0xFF
+
+    def pla(self):
+        carry, zero, interrupt_disable, decimal, overflow, negative = test_alu.lees_status_register(self.status)
+
+        self.sp = (self.sp + 1) & 0xFF
+        adres = 0x0100 + self.sp
+        waarde = self.memory[adres]
+        self.a = waarde
+
+        if waarde == 0:
+            zero = 1
+        else:
+            zero = 0
+
+        negative = (waarde >> 7) & 1
+
+        self.status = test_alu.maak_status_register(carry, zero, interrupt_disable, decimal, overflow, negative)
+
     def voer_programma_uit(self, programma):
         self.pc = 0
 
@@ -531,6 +597,15 @@ class CPU:
             elif instructie == "SBC":
                 self.sbc(waarde)
 
+            elif instructie == "DEX":
+                self.dex()
+
+            elif instructie == "DEY":
+                self.dey()
+
+            elif instructie == "DEC":
+                self.dec(waarde)
+
             elif instructie == "CMP":
                 self.cmp(waarde)
 
@@ -590,6 +665,12 @@ class CPU:
             elif instructie == "TYA":
                 self.tya()
 
+            elif instructie == "PHA":
+                self.pha()
+
+            elif instructie == "PLA":
+                self.pla()
+
             if instructie not in ("JMP", "BEQ", "BNE"):
                 self.pc += 1
             print(self.pc)
@@ -610,12 +691,11 @@ programma = [
 
 cpu = CPU()
 
-carry, zero, interrupt_disable, decimal, overflow, negative = test_alu.lees_status_register(cpu.status)
+cpu.a = 42
+cpu.sp = 0xFD
 
-cpu.a = -100 & 0xFF
-cpu.status = test_alu.maak_status_register(1, zero, interrupt_disable, decimal, overflow, negative)
-cpu.sbc(60)
+cpu.pha()
 
-carry, zero, interrupt_disable, decimal, overflow, negative = test_alu.lees_status_register(cpu.status)
-print(carry, zero, interrupt_disable, decimal, overflow, negative)
+print(cpu.memory[0x01FD])
+print(cpu.sp)
 print(cpu.a)
