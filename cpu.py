@@ -422,7 +422,36 @@ class CPU:
 
         self.status = test_alu.maak_status_register(carry, zero, interrupt_disable, decimal, overflow, negative)
 
+    def sbc(self, waarde):
+        carry, zero, interrupt_disable, decimal, overflow, negative = test_alu.lees_status_register(self.status)
+        
+        resultaat = self.a - waarde - (1 - carry)
+        teken_a = (self.a >> 7) & 1
 
+        if resultaat >= 0:
+            carry = 1
+        else:
+            carry = 0
+
+        self.a = resultaat & 0xFF
+
+        if self.a == 0:
+            zero = 1
+        else:
+            zero = 0
+
+        negative = (self.a >> 7) & 1
+
+        teken_waarde = (waarde >> 7) & 1
+        teken_resultaat = (self.a >> 7) & 1
+
+        if teken_a != teken_waarde and teken_resultaat != teken_a:
+            overflow = 1
+        else:
+            overflow = 0
+
+        self.status = test_alu.maak_status_register(carry, zero, interrupt_disable, decimal, overflow, negative)
+    
     def voer_programma_uit(self, programma):
         self.pc = 0
 
@@ -498,6 +527,9 @@ class CPU:
 
             elif instructie == "ADC":
                 self.adc(waarde)
+
+            elif instructie == "SBC":
+                self.sbc(waarde)
 
             elif instructie == "CMP":
                 self.cmp(waarde)
@@ -580,9 +612,9 @@ cpu = CPU()
 
 carry, zero, interrupt_disable, decimal, overflow, negative = test_alu.lees_status_register(cpu.status)
 
-cpu.a = 156
-cpu.status = test_alu.maak_status_register(0, zero, interrupt_disable, decimal, overflow, negative)
-cpu.adc(196)
+cpu.a = -100 & 0xFF
+cpu.status = test_alu.maak_status_register(1, zero, interrupt_disable, decimal, overflow, negative)
+cpu.sbc(60)
 
 carry, zero, interrupt_disable, decimal, overflow, negative = test_alu.lees_status_register(cpu.status)
 print(carry, zero, interrupt_disable, decimal, overflow, negative)
