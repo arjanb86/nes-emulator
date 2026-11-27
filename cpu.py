@@ -518,6 +518,21 @@ class CPU:
 
         self.status = test_alu.maak_status_register(carry, zero, interrupt_disable, decimal, overflow, negative)
 
+    def php(self):
+        status_op_stack = self.status | 0x30
+        adres = 0x0100 + self.sp
+        self.memory[adres] = status_op_stack
+        self.sp = (self.sp - 1) & 0xFF
+
+    def plp(self):
+        self.sp = (self.sp + 1) & 0xFF
+        adres = 0x0100 + self.sp
+        self.status = self.memory[adres]
+
+        self.status = self.status & 0xEF
+        self.status = self.status | 0x20
+        
+
     def voer_programma_uit(self, programma):
         self.pc = 0
 
@@ -691,11 +706,12 @@ programma = [
 
 cpu = CPU()
 
-cpu.a = 42
+cpu.status = 0b00000001
 cpu.sp = 0xFD
 
-cpu.pha()
+cpu.php()
 
-print(cpu.memory[0x01FD])
-print(cpu.sp)
-print(cpu.a)
+cpu.status = 0
+cpu.plp()
+
+print(cpu.status, cpu.sp)
